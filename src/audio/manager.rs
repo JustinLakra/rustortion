@@ -32,7 +32,11 @@ impl Manager {
 
         let (tuner, tuner_handle) = Tuner::new(sample_rate);
         let (peak_meter, peak_meter_handle) = PeakMeter::new(sample_rate);
-        let samplers = Samplers::new(buffer_size, settings.audio.oversampling_factor.into())?;
+        let samplers = Samplers::new(
+            buffer_size,
+            settings.audio.oversampling_factor.into(),
+            sample_rate,
+        )?;
         let mut metronome = Metronome::new(120.0, sample_rate);
         metronome.load_wav_file("click.wav");
 
@@ -70,10 +74,7 @@ impl Manager {
             available_irs,
         };
 
-        // Auto-connect if requested
-        if settings.audio.auto_connect {
-            manager.connect_ports(&settings.audio);
-        }
+        manager.connect_ports(&settings.audio);
 
         Ok(manager)
     }
@@ -163,10 +164,7 @@ impl Manager {
         // Update settings
         self.current_settings.audio = new_settings.clone();
 
-        // Reconnect with new settings
-        if new_settings.auto_connect {
-            self.connect_ports(&new_settings);
-        }
+        self.connect_ports(&new_settings);
 
         Ok(())
     }
