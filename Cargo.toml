@@ -1,6 +1,6 @@
 [package]
 name = "rustortion"
-version = "0.1.4"
+version = "0.1.6"
 edition = "2024"
 default-run = "rustortion"
 repository = "https://github.com/OpenSauce/rustortion"
@@ -19,18 +19,19 @@ rubato = "0.16"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 crossbeam = "0.8"
-iced = { version = "0.13", features = ["tokio"] }
+iced = { version = "0.14", features = ["tokio"] }
 log = "0.4"
 env_logger = "0.11"
 dotenv = "0.15"
 anyhow = "1.0"
 rustfft = "6.4"
 realfft = "3.5"
-arc-swap = "1.7"
+arc-swap = "1.8"
+midir = "0.10"
 
 [dev-dependencies]
 criterion = {version = "0.8", features = ["html_reports"] }
-tempfile = "3.23"
+tempfile = "3.24"
 
 [[bench]]
 name = "impulse_responses"
@@ -41,10 +42,17 @@ name = "engine"
 harness = false
 
 [[bench]]
+name = "chain"
+harness = false
+
+[[bench]]
 name = "samplers"
 harness = false
 
-# The profile that 'dist' will build with
+# Enable optimisation level 1 for dev profile, otherwise IR cabinet code tanks in debug mode.
+[profile.dev]
+opt-level = 1
+
 [profile.dist]
 inherits = "release"
 codegen-units = 1

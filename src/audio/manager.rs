@@ -11,7 +11,7 @@ use crate::audio::samplers::Samplers;
 use crate::ir::cabinet::IrCabinet;
 use crate::metronome::Metronome;
 use crate::settings::{AudioSettings, Settings};
-use crate::sim::tuner::{Tuner, TunerHandle};
+use crate::tuner::{Tuner, TunerHandle};
 
 pub struct Manager {
     active_client: AsyncClient<NotificationHandler, ProcessHandler>,
@@ -41,10 +41,7 @@ impl Manager {
         metronome.load_wav_file("click.wav");
 
         let ir_cabinet = match IrCabinet::new(Path::new(&settings.ir_dir), sample_rate) {
-            Ok(cab) => {
-                info!("IR Cabinet loaded successfully");
-                Some(cab)
-            }
+            Ok(cab) => Some(cab),
             Err(e) => {
                 warn!("Failed to load IR Cabinet: {}", e);
                 None

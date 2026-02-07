@@ -1,7 +1,8 @@
-use iced::widget::{checkbox, column, container, pick_list, row, slider, text};
+use iced::widget::{checkbox, column, container, pick_list, row, rule, slider, text};
 use iced::{Alignment, Element, Length};
 
 use crate::gui::messages::Message;
+use crate::tr;
 
 pub struct IrCabinetControl {
     available_irs: Vec<String>,
@@ -12,17 +13,17 @@ pub struct IrCabinetControl {
 
 impl Default for IrCabinetControl {
     fn default() -> Self {
-        Self::new(false)
+        Self::new(false, 0.1)
     }
 }
 
 impl IrCabinetControl {
-    pub fn new(bypassed: bool) -> Self {
+    pub fn new(bypassed: bool, gain: f32) -> Self {
         Self {
             available_irs: Vec::new(),
             selected_ir: None,
             bypassed,
-            gain: 0.1,
+            gain,
         }
     }
 
@@ -60,14 +61,14 @@ impl IrCabinetControl {
 
     pub fn view(&self) -> Element<'static, Message> {
         let header =
-            text("Cabinet IR")
+            text(tr!(cabinet_ir))
                 .size(18)
                 .style(|theme: &iced::Theme| iced::widget::text::Style {
                     color: Some(theme.palette().text),
                 });
 
         let ir_selector = row![
-            text("IR:").width(Length::Fixed(80.0)),
+            text(tr!(ir)).width(Length::Fixed(80.0)),
             pick_list(
                 self.available_irs.clone(),
                 self.selected_ir.clone(),
@@ -78,10 +79,13 @@ impl IrCabinetControl {
         .spacing(10)
         .align_y(Alignment::Center);
 
-        let bypass_control = checkbox("Bypass", self.bypassed).on_toggle(Message::IrBypassed);
+        let bypass_control = checkbox(self.bypassed)
+            .label(tr!(bypassed))
+            .on_toggle(Message::IrBypassed);
 
+        let gain_label = format!("{}:", tr!(gain));
         let gain_control = row![
-            text("Gain:").width(Length::Fixed(80.0)),
+            text(gain_label).width(Length::Fixed(80.0)),
             slider(0.0..=1.0, self.gain, Message::IrGainChanged)
                 .width(Length::FillPortion(7))
                 .step(0.01),
@@ -91,19 +95,20 @@ impl IrCabinetControl {
         .align_y(Alignment::Center);
 
         let status = if self.bypassed {
-            text("(Bypassed)")
+            let bypassed_status = format!("({})", tr!(bypassed));
+            text(bypassed_status)
                 .size(14)
                 .style(|_| iced::widget::text::Style {
                     color: Some(iced::Color::from_rgb(0.7, 0.7, 0.7)),
                 })
         } else if let Some(ref ir_name) = self.selected_ir {
-            text(format!("Active: {}", ir_name))
+            text(format!("{} {}", tr!(active), ir_name))
                 .size(14)
                 .style(|_| iced::widget::text::Style {
                     color: Some(iced::Color::from_rgb(0.3, 1.0, 0.3)),
                 })
         } else {
-            text("No IR loaded")
+            text(tr!(no_ir_loaded))
                 .size(14)
                 .style(|_| iced::widget::text::Style {
                     color: Some(iced::Color::from_rgb(1.0, 0.7, 0.3)),
@@ -112,7 +117,7 @@ impl IrCabinetControl {
 
         let content = column![
             header,
-            iced::widget::rule::Rule::horizontal(1),
+            rule::horizontal(1),
             ir_selector,
             gain_control,
             bypass_control,

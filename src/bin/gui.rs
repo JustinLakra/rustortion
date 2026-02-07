@@ -1,6 +1,5 @@
-use anyhow::{Context, Result};
+use anyhow::Result;
 use log::info;
-use rustortion::audio::manager::Manager;
 use rustortion::gui::start;
 use rustortion::settings::Settings;
 
@@ -16,7 +15,6 @@ pub fn main() -> Result<()> {
 
     env_logger::init();
 
-    info!("Rustortion GUI v{}", env!("CARGO_PKG_VERSION"));
     info!(
         r#"
 __________                __                 __  .__               
@@ -27,18 +25,10 @@ __________                __                 __  .__
         \/           \/                                         \/ 
     "#
     );
+    info!("v{}", env!("CARGO_PKG_VERSION"));
+    info!("{}", settings);
 
-    info!("Audio Settings:");
-    info!("  Input: {}", settings.audio.input_port);
-    info!("  Output L: {}", settings.audio.output_left_port);
-    info!("  Output R: {}", settings.audio.output_right_port);
-    info!("  Buffer Size: {}", settings.audio.buffer_size);
-    info!("  Sample Rate: {}", settings.audio.sample_rate);
-
-    let audio_manager =
-        Manager::new(settings.clone()).context("failed to create ProcessorManager")?;
-
-    start(audio_manager, settings).map_err(|e| anyhow::anyhow!("GUI error: {}", e))?;
+    start(settings).map_err(|e| anyhow::anyhow!("GUI error: {}", e))?;
 
     Ok(())
 }

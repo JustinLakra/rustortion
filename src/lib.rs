@@ -1,7 +1,10 @@
+pub mod amp;
 pub mod audio;
 pub mod gui;
+pub mod i18n;
 pub mod ir;
 pub mod metronome;
+pub mod midi;
 pub mod preset;
 pub mod settings;
-pub mod sim;
+pub mod tuner;

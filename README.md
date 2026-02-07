@@ -1,6 +1,8 @@
 
 # Rustortion
 
+English | [简体中文](README.zh-CN.md)
+
 A guitar amp simulator built in Rust using JACK.
 
 ## Screenshot
@@ -9,24 +11,26 @@ A guitar amp simulator built in Rust using JACK.
 
 ## Features
 
-- Low-latency audio processing with oversampling
+- Low-latency audio processing with configurable oversampling
 - Multiple amp simulation stages (preamp, compressor, tone stack, power amp, etc.)
-- Impulse response (IR) cabinet simulation
-- Save and load presets
+- Impulse response cabinet simulation for both guitar and bass
+- Saving and loading presets
 - Real-time recording capability
 - Built-in tuner
+- Basic MIDI controller support
 - GUI using [Iced](https://github.com/iced-rs/iced)
 
 ## Requirements
 
 - **Linux** with PipeWire (JACK support enabled)
 - **Rust** toolchain: [Install Rust](https://rustup.rs/)
+
 > [!NOTE]
-> It may be possible without PipeWire, but that's not been tested yet. [See this issue.](https://github.com/OpenSauce/rustortion/issues/100)
+> This has been tested on a Raspberry Pi 4 and reasonably high end desktop PC. Your mileage may vary on other hardware.
 
 ## Running
 
-### Prebuilt Binary
+### Pre-built Binary
 
 You can download a tarball of a pre-built binary from the [releases page.](https://github.com/OpenSauce/rustortion/releases/)
 
@@ -41,9 +45,16 @@ cd rustortion-x86_64-unknown-linux-gnu
 
 With the rust toolchain installed, you can clone the repository and run the application:
 ```bash
-sudo apt-get install libjack-jackd2-dev pkg-config
+sudo apt-get install libjack-jackd2-dev libasound2-dev pkg-config
 cargo run --release
 ```
+
+> [!TIP]
+> On some Linux machines with PipeWire, you may need to run JACK explicitly:
+> ```bash
+> sudo apt-get install pipewire-jack
+> pw-jack cargo run --release
+> ```
 
 ## Contributing
 
@@ -56,9 +67,15 @@ Rustortion is under active development and should be used at your own risk.
 
 ### Impulse Responses
 
-This project includes freely licensed impulse responses from [freesound.org](https://freesound.org/):
+#### Science Amplification
+
+This project includes impulse responses used with permission from [Science Amplification](https://www.scienceamps.com/).
+
+#### Other
+
+This project also includes freely licensed impulse responses from [freesound.org](https://freesound.org/):
 
 - [Multiple Cabinets – Jesterdyne](https://freesound.org/people/jesterdyne/)
-- [Harley Benton 4x12 – Vihaleipa](https://freesound.org/people/Vihaleipa/sounds/269662/)
 - [Bristol Mix – Mansardian](https://freesound.org/people/mansardian/sounds/648392/)
 - [Brown Cab – Tosha73](https://freesound.org/people/tosha73/sounds/507167/)
+

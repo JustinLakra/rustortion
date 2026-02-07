@@ -1,6 +1,7 @@
 pub mod compressor;
 pub mod filter;
 pub mod level;
+pub mod multiband_saturator;
 pub mod noise_gate;
 pub mod poweramp;
 pub mod preamp;
@@ -9,15 +10,17 @@ pub mod tonestack;
 pub use compressor::CompressorConfig;
 pub use filter::FilterConfig;
 pub use level::LevelConfig;
+pub use multiband_saturator::MultibandSaturatorConfig;
 pub use noise_gate::NoiseGateConfig;
 pub use poweramp::PowerAmpConfig;
 pub use preamp::PreampConfig;
 pub use tonestack::ToneStackConfig;
 
 use crate::gui::messages::{
-    CompressorMessage, FilterMessage, LevelMessage, NoiseGateMessage, PowerAmpMessage,
-    PreampMessage, StageMessage, ToneStackMessage,
+    CompressorMessage, FilterMessage, LevelMessage, MultibandSaturatorMessage, NoiseGateMessage,
+    PowerAmpMessage, PreampMessage, StageMessage, ToneStackMessage,
 };
+use crate::tr;
 use serde::{Deserialize, Serialize};
 use std::fmt::Display;
 
@@ -32,18 +35,20 @@ pub enum StageType {
     PowerAmp,
     Level,
     NoiseGate,
+    MultibandSaturator,
 }
 
 impl Display for StageType {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            StageType::Filter => write!(f, "Filter"),
-            StageType::Preamp => write!(f, "Preamp"),
-            StageType::Compressor => write!(f, "Compressor"),
-            StageType::ToneStack => write!(f, "Tone Stack"),
-            StageType::PowerAmp => write!(f, "Power Amp"),
-            StageType::Level => write!(f, "Level"),
-            StageType::NoiseGate => write!(f, "Noise Gate"),
+            StageType::Filter => write!(f, "{}", tr!(stage_filter)),
+            StageType::Preamp => write!(f, "{}", tr!(stage_preamp)),
+            StageType::Compressor => write!(f, "{}", tr!(stage_compressor)),
+            StageType::ToneStack => write!(f, "{}", tr!(stage_tone_stack)),
+            StageType::PowerAmp => write!(f, "{}", tr!(stage_power_amp)),
+            StageType::Level => write!(f, "{}", tr!(stage_level)),
+            StageType::NoiseGate => write!(f, "{}", tr!(stage_noise_gate)),
+            StageType::MultibandSaturator => write!(f, "{}", tr!(stage_multiband_saturator)),
         }
     }
 }
@@ -58,6 +63,9 @@ impl From<StageType> for StageConfig {
             StageType::PowerAmp => StageConfig::PowerAmp(PowerAmpConfig::default()),
             StageType::Level => StageConfig::Level(LevelConfig::default()),
             StageType::NoiseGate => StageConfig::NoiseGate(NoiseGateConfig::default()),
+            StageType::MultibandSaturator => {
+                StageConfig::MultibandSaturator(MultibandSaturatorConfig::default())
+            }
         }
     }
 }
@@ -72,18 +80,20 @@ pub enum StageConfig {
     PowerAmp(PowerAmpConfig),
     Level(LevelConfig),
     NoiseGate(NoiseGateConfig),
+    MultibandSaturator(MultibandSaturatorConfig),
 }
 
 impl StageConfig {
-    pub fn to_runtime(&self, sample_rate: f32) -> Box<dyn crate::sim::stages::Stage> {
+    pub fn to_runtime(&self, sample_rate: f32) -> Box<dyn crate::amp::stages::Stage> {
         match self {
             StageConfig::Filter(cfg) => Box::new(cfg.to_stage(sample_rate)),
-            StageConfig::Preamp(cfg) => Box::new(cfg.to_stage()),
+            StageConfig::Preamp(cfg) => Box::new(cfg.to_stage(sample_rate)),
             StageConfig::Compressor(cfg) => Box::new(cfg.to_stage(sample_rate)),
             StageConfig::ToneStack(cfg) => Box::new(cfg.to_stage(sample_rate)),
             StageConfig::PowerAmp(cfg) => Box::new(cfg.to_stage(sample_rate)),
             StageConfig::Level(cfg) => Box::new(cfg.to_stage()),
             StageConfig::NoiseGate(cfg) => Box::new(cfg.to_stage(sample_rate)),
+            StageConfig::MultibandSaturator(cfg) => Box::new(cfg.to_stage(sample_rate)),
         }
     }
 
@@ -93,7 +103,6 @@ impl StageConfig {
                 match m {
                     FilterMessage::TypeChanged(t) => cfg.filter_type = t,
                     FilterMessage::CutoffChanged(v) => cfg.cutoff_hz = v,
-                    FilterMessage::ResonanceChanged(v) => cfg.resonance = v,
                 }
                 true
             }
@@ -146,6 +155,19 @@ impl StageConfig {
                     NoiseGateMessage::AttackChanged(v) => cfg.attack_ms = v,
                     NoiseGateMessage::HoldChanged(v) => cfg.hold_ms = v,
                     NoiseGateMessage::ReleaseChanged(v) => cfg.release_ms = v,
+                }
+                true
+            }
+            (StageConfig::MultibandSaturator(cfg), StageMessage::MultibandSaturator(m)) => {
+                match m {
+                    MultibandSaturatorMessage::LowDriveChanged(v) => cfg.low_drive = v,
+                    MultibandSaturatorMessage::MidDriveChanged(v) => cfg.mid_drive = v,
+                    MultibandSaturatorMessage::HighDriveChanged(v) => cfg.high_drive = v,
+                    MultibandSaturatorMessage::LowLevelChanged(v) => cfg.low_level = v,
+                    MultibandSaturatorMessage::MidLevelChanged(v) => cfg.mid_level = v,
+                    MultibandSaturatorMessage::HighLevelChanged(v) => cfg.high_level = v,
+                    MultibandSaturatorMessage::LowFreqChanged(v) => cfg.low_freq = v,
+                    MultibandSaturatorMessage::HighFreqChanged(v) => cfg.high_freq = v,
                 }
                 true
             }
